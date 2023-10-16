@@ -11,11 +11,13 @@ class AbstractRecipeOwner(models.Model):
         'Recipe',
         on_delete=models.CASCADE,
         related_name='%(class)ss',
+        verbose_name=_('Рецепт')
     )
     owner = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='%(class)ss',
+        verbose_name=_('Пользователь')
     )
 
     class Meta:
@@ -39,13 +41,13 @@ class Recipe(models.Model):
         'Ingredient',
         through='RecipeIngredient',
         related_name='recipes',
-        verbose_name=_('Список ингридиентов'),
+        verbose_name=_('Список ингредиентов'),
     )
-    name = models.CharField(_('Название'), max_length=200)
+    name = models.CharField(_('Название'), max_length=200, unique=True)
     image = models.ImageField(_('Картинка'), upload_to='recipe/img/')
     text = models.TextField(_('Описание'))
     cooking_time = models.PositiveSmallIntegerField(
-        _('Время'),
+        _('Время готовки'),
         validators=[
             MinValueValidator(
                 limit_value=1,
@@ -65,15 +67,16 @@ class Recipe(models.Model):
 
 
 class Ingredient(models.Model):
-    name = models.CharField(_('Название'), max_length=200, unique=True)
+    name = models.CharField(_('Название'), max_length=200)
     measurement_unit = models.CharField(_('Единица измерения'), max_length=200)
 
     def __str__(self) -> str:
         return self.name
 
     class Meta:
-        verbose_name = _('Ингридиент')
-        verbose_name_plural = _('Ингридиенты')
+        ordering = ['name']
+        verbose_name = _('Ингредиент')
+        verbose_name_plural = _('Ингредиенты')
 
 
 class Tag(models.Model):
@@ -101,8 +104,17 @@ class Tag(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE)
-    ingredient = models.ForeignKey('Ingredient', on_delete=models.CASCADE)
+    recipe = models.ForeignKey(
+        'Recipe',
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredient',
+    )
+    ingredient = models.ForeignKey(
+        'Ingredient',
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredient',
+        verbose_name=_('Ингредиент'),
+    )
     amount = models.PositiveSmallIntegerField(
         _('Количество'),
         validators=[
@@ -110,21 +122,30 @@ class RecipeIngredient(models.Model):
                 limit_value=1,
                 message=_('Введите целое число.')
             )],
-        blank=True,
     )
+
+    class Meta:
+        verbose_name = _('Ингредиент')
+        verbose_name_plural = _('Ингредиенты рецепта')
 
 
 class ShopCart(AbstractRecipeOwner):
     class Meta:
         verbose_name = _('Список покупок')
+        verbose_name_plural = _('Списки покупок')
 
     def __str__(self) -> str:
-        return f'Список покупок пользователя {self.owner}'
+        return f'"{self.recipe}" в списке покупок пользователя - {self.owner}'
 
 
 class Favorite(AbstractRecipeOwner):
     class Meta:
-        verbose_name = _('Избранное')
+        verbose_name = _('Избранный рецепт')
+        verbose_name_plural = _('Избранные рецепты')
+
+    def __str__(self):
+        return (f'"{self.recipe}" в избранных '
+                f'у пользователя - {self.owner.first_name}')
 
 
 class Subscription(models.Model):
@@ -132,13 +153,13 @@ class Subscription(models.Model):
         User,
         on_delete=models.CASCADE,
         related_name='subscribers',
-        verbose_name='Пользователь',
+        verbose_name=_('Пользователь'),
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='subscribing',
-        verbose_name='Автор рецепта',
+        verbose_name=_('Автор рецепта'),
     )
 
     class Meta:
@@ -156,4 +177,5 @@ class Subscription(models.Model):
         verbose_name_plural = _('Подписки')
 
     def __str__(self) -> str:
-        return f'{self.user} подписан на {self.author}.'
+        return (f'{self.user.first_name} подписан(а) '
+                f'на - {self.author.first_name}')

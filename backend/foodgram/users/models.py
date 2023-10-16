@@ -12,15 +12,26 @@ class User(AbstractUser):
             'unique': _('Пользователь с таким email уже существует.'),
         },
     )
+    first_name = models.CharField(
+        _('Имя'),
+        max_length=150,
+        help_text=_('Обязательное поле.'),
+    )
+    last_name = models.CharField(
+        _('Фамилия'),
+        max_length=150,
+        help_text=_('Обязательное поле.'),
+    )
     admin = models.BooleanField(
         verbose_name=_('статус администратора'),
         default=False,
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
+        ordering = ['id']
         verbose_name = _('Пользователь')
         verbose_name_plural = _('Пользователи')
 
