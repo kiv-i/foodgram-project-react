@@ -2,18 +2,17 @@ from django.contrib.auth import get_user_model
 from django.db.models import Exists, OuterRef, Sum
 from django.http import Http404, HttpResponse
 from django.utils.translation import gettext_lazy as _
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import exceptions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.fields import ObjectDoesNotExist
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
 
 from .filters import RecipeFilter
-
 from .models import Favorite, Ingredient, Recipe, ShopCart, Subscription, Tag
-from .permissions import IsAdminOrReadOnly, IsAuthorOrReadOnly
+from .permissions import IsAuthorOrReadOnly
 from .serializers import (IngredientSerializer, RecipeListSerializer,
                           RecipeSerializer, RecipeWriteSerializer,
                           SubscriptionSerializer, TagSerializer)
@@ -25,7 +24,6 @@ User = get_user_model()
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    # permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
     filter_backends = (SearchFilter,)
     search_fields = ('^name',)
@@ -34,7 +32,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    # permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
 
 
@@ -44,7 +41,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     ).prefetch_related(
         'ingredients', 'tags',
     )
-    http_method_names = ('get', 'post', 'patch', 'delete')
+    http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter

@@ -15,8 +15,8 @@ class IngredientInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     list_display = ('name', 'get_image', 'author', 'pub_date')
-    fields = ('name', 'get_image', 'image', 'author',
-              'tags', 'text', 'cooking_time', 'count_fav')
+    fields = ('name', 'image', 'author', 'tags',
+              'text', 'cooking_time', 'count_fav')
     readonly_fields = ('get_image', 'count_fav')
     list_select_related = ('author',)
     raw_id_fields = ('tags',)

@@ -3,8 +3,8 @@ from django.db.transaction import atomic
 from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions, serializers
 from rest_framework.validators import UniqueTogetherValidator
-
 from users.serializers import CustomUserSerializer
+
 from .models import Ingredient, Recipe, RecipeIngredient, Tag, User
 from .utils import Base64ImageField
 
