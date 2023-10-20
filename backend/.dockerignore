@@ -7,5 +7,3 @@ db.sqlite3
 media
 .gitkeep
 **/__pycache__*
-!__init__.py
-*/migrations/*
