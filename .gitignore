@@ -26,7 +26,8 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-migrations/
+**/migrations/*
+!__init__.py
 media/
 .kolo/
 
