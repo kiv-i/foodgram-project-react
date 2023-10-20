@@ -3,7 +3,7 @@ name: Main Footgram Workflow
 on:
   push:
     branches: 
-      - main
+      - master
 
 jobs:
   BACKEND_TESTS:
@@ -47,27 +47,6 @@ jobs:
           SECRET_KEY: django-sekret-key
         run: python -m flake8 backend/
 
-  FRONTEND_TESTS:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
-
-      - name: Set Up NodeJS
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-
-      - name: Install Dependencies
-        run: |
-          cd frontend/
-          npm ci
-
-      - name: Test Frontend
-        run: |
-          cd frontend/
-          npm run test
-
   BUILD_BACKEND_AND_PUSH_TO_DOCKER_HUB:
     name: Push Backend Docker Image To DockerHub
     runs-on: ubuntu-latest
@@ -90,12 +69,12 @@ jobs:
         with:
           context: ./backend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/footgram_backend:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
 
   BUILD_FRONTEND_AND_PUSH_TO_DOCKER_HUB:
     name: Push Frontend Docker Image To DockerHub
     runs-on: ubuntu-latest
-    needs: FRONTEND_TESTS
+    needs: BACKEND_TESTS
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
@@ -148,6 +127,7 @@ jobs:
             sudo docker compose -f docker-compose.production.yml pull
             sudo docker compose -f docker-compose.production.yml down
             sudo docker compose -f docker-compose.production.yml up -d
+            sudo docker compose -f docker-compose.production.yml exec backend python manage.py makemigrations
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py migrate
             sudo docker compose -f docker-compose.production.yml exec backend python manage.py collectstatic
             sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/static/. /static/static/

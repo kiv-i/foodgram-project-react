@@ -2,7 +2,6 @@ import csv
 
 from django.core.management.base import BaseCommand, CommandError
 from django.utils.translation import gettext_lazy as _
-
 from foodgram import settings
 from recipes.models import Ingredient
 
