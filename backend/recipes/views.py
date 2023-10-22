@@ -89,7 +89,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 'Content-Disposition': 'attachment; filename=shop_cart.txt'
             },
         )
-        shop_cart = ['\u0332'.join(' СПИСОК ПОКУПОК:') + '\n\n',]
+        shop_cart = ['\u0332'.join(' СПИСОК ПОКУПОК:') + '\n\n', ]
 
         for ingredient in ingredients:
             name = ingredient['name']
