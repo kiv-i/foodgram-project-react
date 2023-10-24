@@ -28,7 +28,7 @@ Docker. Есть возможность deploy проекта с помощью 
 
 Перед запуском проекта на сервер, в папку с будущим проектом, скопировать 
 файл "docker-compose.production.yml" и файл с переменными окружения ".env", 
-пример такого файла "example.env".
+пример такого файла ".env.example".
 
 После запуска проекта создать superuser для доступа к "https://your_domain/admin/":
 ```
@@ -42,13 +42,13 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 
 ### Примеры использования
 
-Приложение доступно по адресу https://your_domain/
+Приложение доступно по адресу: https://your_domain/
 
 Доступно API: https://your_domain/api/
 
 Для пользования API необходимо получить токен авторизации.
 
-Подробная документация с примерами запросов API доступна по адресу https://your_domain/api/docs/
+Подробная документация с примерами запросов API доступна по адресу: https://your_domain/api/docs/
 
 ### Авторы
 
