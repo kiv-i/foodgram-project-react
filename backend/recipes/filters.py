@@ -1,6 +1,8 @@
 from django.utils.translation import gettext_lazy as _
 from django_filters import rest_framework as filters
 
+from .models import Recipe
+
 
 class RecipeFilter(filters.FilterSet):
     is_favorited = filters.BooleanFilter(
@@ -13,8 +15,11 @@ class RecipeFilter(filters.FilterSet):
         label=_('В списке покупок'),
         method='filter_owner',
     )
-    author = filters.NumberFilter(field_name='author_id')
     tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
+
+    class Meta:
+        model = Recipe
+        fields = ('author', 'tags')
 
     def filter_owner(self, queryset, name, value):
         lookup = '__'.join([name, 'owner'])

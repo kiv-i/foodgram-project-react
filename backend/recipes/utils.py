@@ -7,9 +7,13 @@ from rest_framework import exceptions, serializers, status
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 
+from .models import RecipeIngredient
 
-def action_method(self, request, model, serializer, pk=None):
-    """Обработка запросов /favorite и /shopping_cart"""
+
+def action_method(self, request, model, pk=None):
+    """Обработка запросов /favorite и /shopping_cart."""
+    from .serializers import RecipeListSerializer
+
     owner = self.request.user
     try:
         recipe = self.get_object()
@@ -35,8 +39,33 @@ def action_method(self, request, model, serializer, pk=None):
             _(f'Рецепт уже в списке {model._meta.verbose_name}.'))
 
     model.objects.create(owner=owner, recipe=recipe)
-    serializer = serializer(recipe)
+    serializer = RecipeListSerializer(recipe)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+def ingredient_create(recipe, ingredients):
+    """Сохраняет ингредиенты."""
+    objs = []
+    for ingredient_amount in ingredients:
+        ingredient_id = ingredient_amount.get('ingredient_id')
+        amount = ingredient_amount.get('amount')
+        objs.append(RecipeIngredient(
+            recipe=recipe, ingredient_id=ingredient_id, amount=amount
+        ))
+    RecipeIngredient.objects.bulk_create(objs)
+
+
+def shop_cart(ingredients):
+    """Группирование ингредиентов в список."""
+    shop_cart = ['\u0332'.join(' СПИСОК ПОКУПОК:') + '\n\n', ]
+
+    for ingredient in ingredients:
+        name = ingredient['name']
+        measure = ingredient['measurement_unit']
+        amount = ingredient['amount']
+        shop_cart.append(f'\u2705 {name} ({measure}) \u268A {amount} \n')
+
+    return shop_cart
 
 
 class Base64ImageField(serializers.ImageField):

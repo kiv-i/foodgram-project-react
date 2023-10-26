@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -57,26 +59,43 @@ class Recipe(models.Model):
     )
     pub_date = models.DateTimeField(_('Дата публикации'), auto_now_add=True)
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         ordering = ['-pub_date']
         verbose_name = _('Рецепт')
         verbose_name_plural = _('Рецепты')
+
+    def __str__(self) -> str:
+        return self.name
+
+    def delete(self, *args, **kwargs):
+        path = Path(self.image.path)
+        super().delete(*args, **kwargs)
+        # Удалить файл картинки при удалении рецепта.
+        if path:
+            path.unlink(missing_ok=True)
+
+    def save(self, *args, **kwargs):
+        # Удалить старый файл картинки при обновлении.
+        try:
+            path = Path(Recipe.objects.get(pk=self.pk).image.path)
+        except Recipe.DoesNotExist:
+            path = None
+        super().save(*args, **kwargs)
+        if path:
+            path.unlink(missing_ok=True)
 
 
 class Ingredient(models.Model):
     name = models.CharField(_('Название'), max_length=200)
     measurement_unit = models.CharField(_('Единица измерения'), max_length=200)
 
-    def __str__(self) -> str:
-        return self.name
-
     class Meta:
         ordering = ['name']
         verbose_name = _('Ингредиент')
         verbose_name_plural = _('Ингредиенты')
+
+    def __str__(self) -> str:
+        return self.name
 
 
 class Tag(models.Model):
