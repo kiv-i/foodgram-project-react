@@ -137,10 +137,11 @@ dmypy.json
 .vscode/
 
 # heavy files
-/frontend
+
+# /frontend
 /infra
-/data
-/docs
-backend.Dockerfile
-backend.Dockerfile.dockerignore
-docker-compose.yml
+# /data
+# /docs
+# backend.Dockerfile
+# backend.Dockerfile.dockerignore
+# docker-compose.yml

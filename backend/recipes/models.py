@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from rest_framework.fields import MinValueValidator, RegexValidator
@@ -81,7 +82,10 @@ class Recipe(models.Model):
         except Recipe.DoesNotExist:
             path = None
         super().save(*args, **kwargs)
-        if path:
+        path_new = Path(Recipe.objects.get(pk=self.pk).image.path)
+        if path == path_new:
+            pass
+        else:
             path.unlink(missing_ok=True)
 
 
@@ -93,6 +97,12 @@ class Ingredient(models.Model):
         ordering = ['name']
         verbose_name = _('Ингредиент')
         verbose_name_plural = _('Ингредиенты')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_ingredient',
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.name
@@ -139,19 +149,31 @@ class RecipeIngredient(models.Model):
         validators=[
             MinValueValidator(
                 limit_value=1,
-                message=_('Введите целое число.')
+                message=_('Значение не должно быть меньше 1.')
             )],
     )
 
     class Meta:
         verbose_name = _('Ингредиент')
         verbose_name_plural = _('Ингредиенты рецепта')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='unique_recipe_ingredient',
+            ),
+        ]
 
 
 class ShopCart(AbstractRecipeOwner):
     class Meta:
         verbose_name = _('Список покупок')
         verbose_name_plural = _('Списки покупок')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'owner'],
+                name='unique_shopcart',
+            ),
+        ]
 
     def __str__(self) -> str:
         return f'"{self.recipe}" в списке покупок пользователя - {self.owner}'
@@ -161,6 +183,12 @@ class Favorite(AbstractRecipeOwner):
     class Meta:
         verbose_name = _('Избранный рецепт')
         verbose_name_plural = _('Избранные рецепты')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'owner'],
+                name='unique_favorite',
+            ),
+        ]
 
     def __str__(self):
         return (f'"{self.recipe}" в избранных '
@@ -185,15 +213,20 @@ class Subscription(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
-                name='unique_subscription'
+                name='unique_subscription',
             ),
             models.CheckConstraint(
                 check=~models.Q(user=models.F('author')),
-                name='not_subscription_yourself'
+                name='not_subscription_yourself',
             ),
         ]
         verbose_name = _('Подписка')
         verbose_name_plural = _('Подписки')
+
+    def clean_fields(self, exclude=None):
+        super().clean_fields(exclude=exclude)
+        if self.user == self.author:
+            raise ValidationError(_('Нельзя подписаться на самого себя.'))
 
     def __str__(self) -> str:
         return (f'{self.user.first_name} подписан(а) '
