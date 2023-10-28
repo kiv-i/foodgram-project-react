@@ -19,7 +19,7 @@ def action_method(self, request, model, pk=None):
         recipe = self.get_object()
     except Http404:
         raise exceptions.ParseError(
-            _('Вы пытаетесь добавить несуществующий рецепт.')
+            _('Такого рецепта не существует.')
         )
 
     if request.method == 'DELETE':

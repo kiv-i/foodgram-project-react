@@ -48,6 +48,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         queryset = super().get_queryset()
         if current_user.is_anonymous:
             return queryset
+
         favorite = Favorite.objects.filter(
             recipe=OuterRef('pk'), owner=current_user)
         shopcart = ShopCart.objects.filter(

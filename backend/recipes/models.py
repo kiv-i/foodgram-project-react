@@ -85,7 +85,7 @@ class Recipe(models.Model):
         path_new = Path(Recipe.objects.get(pk=self.pk).image.path)
         if path == path_new:
             pass
-        else:
+        if path:
             path.unlink(missing_ok=True)
 
 

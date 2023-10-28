@@ -138,10 +138,4 @@ dmypy.json
 
 # heavy files
 
-# /frontend
 /infra
-# /data
-# /docs
-# backend.Dockerfile
-# backend.Dockerfile.dockerignore
-# docker-compose.yml
