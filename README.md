@@ -56,6 +56,3 @@ sudo docker compose -f docker-compose.production.yml exec backend python manage.
 
 
 https://fooodgram.duckdns.org/
-
-admin@m.ru
-689159
